@@ -12,7 +12,7 @@
 <body>
     <h1>Partida: {{ game_id }}</h1>
     <div id="status">Conectando...</div>
-    
+
     <hr>
     <p>Nombre: <input type="text" id="nombre" onfocus="bloquear('nombre')" onblur="enviar('nombre')"></p>
     <p>Animal: <input type="text" id="animal" onfocus="bloquear('animal')" onblur="enviar('animal')"></p>
@@ -54,10 +54,7 @@
             }
 
 	socket.on('fin_juego', (data) => {
-    // 1. Mostrar la razón (Tiempo o Completado)
     		alert("FIN DE LA PARTIDA: " + data.razon);
-    
-    // 2. Bloquear todos los inputs para que no escriban más
     		document.getElementById('nombre').disabled = true;
     		document.getElementById('animal').disabled = true;
     		document.getElementById('comida').disabled = true;

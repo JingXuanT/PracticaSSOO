@@ -36,7 +36,6 @@ def iniciar(data):
 def recibir_palabra(data):
     room = str(data['room'])
     cat = data['categoria']
-
     palabra = data['valor'].strip().upper() 
 
     partida = partidas.get(room)
@@ -53,6 +52,7 @@ def recibir_palabra(data):
         tablero_lleno = all(valor != "" for valor in partida['categorias'].values())
         if tablero_lleno:
             partida['activa'] = False
+
             emit('fin_juego', {
                 'razon': '¡Tablero completado!', 
                 'tablero': partida['categorias']
@@ -61,7 +61,8 @@ def recibir_palabra(data):
     else:
         emit('error', {
             'msg': f'La palabra debe empezar por la letra {letra_juego}'
-        }, to=request.sid) 
+        }, to=request.sid)
+
 @app.route('/stop/<int:game_id>')
 def index(game_id):
     return render_template('juego.html', game_id = game_id)
@@ -71,8 +72,12 @@ def handle_join(data):
     room = str(data['room'])
     join_room(room)
     if room not in partidas:
-        partidas[room] = {'categorias': {}}
-    print(f"Jugador unido a la partida: {room}")
+        partidas[room] = {'categorias': {cat "" for cat in CATEGORIAS_BASE}}
+    partidas[room]['jugadores'].add(request.sid)
+
+    cantidad_actual = len(partidas[room]['jugadores'])
+    emit('actualizar_jugadores', {'cantidad': cantidad_actual}, room= room)
+    print(f"Jugador unido a la partida: {room}. Total: {cantidad_actual}")
 
 @socketio.on('escribiendo')
 def handle_typing(data):
@@ -81,8 +86,18 @@ def handle_typing(data):
 
     emit ('bloquear_categoria', {'cat':cat}, room = room, include_self= False)
 
+@app.route('/stop/new')
+def crear_partida():
+    game_id = str(random.randint(0000,9999))
+    partidas[game_id] = {
+            'letra': None,
+            'activa': False,
+            'categorias': { cat: "" for cat in CATEGORIAS_BASE}
+            'jugadores': set()
+            }
+
 @socketio.on('palabra_lista')
-def handle_word(data): 
+def handle_word(data):
     room = str(data['room'])
     cat = data ['categoria']
     val = data['valor']
