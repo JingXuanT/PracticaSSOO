@@ -57,7 +57,7 @@ def recibir_palabra(data):
                 'razon': '¡Tablero completado!', 
                 'tablero': partida['categorias']
             }, room=room)
-            
+
     else:
         emit('error', {
             'msg': f'La palabra debe empezar por la letra {letra_juego}'
@@ -71,13 +71,10 @@ def index(game_id):
 def handle_join(data):
     room = str(data['room'])
     join_room(room)
-    if room not in partidas:
-        partidas[room] = {'categorias': {cat "" for cat in CATEGORIAS_BASE}}
-    partidas[room]['jugadores'].add(request.sid)
 
-    cantidad_actual = len(partidas[room]['jugadores'])
-    emit('actualizar_jugadores', {'cantidad': cantidad_actual}, room= room)
-    print(f"Jugador unido a la partida: {room}. Total: {cantidad_actual}")
+    if room notas: in partidas:
+        partidas[room] = {'categorias': {}}
+    print(f"Jugador unido a la partida: {room}")
 
 @socketio.on('escribiendo')
 def handle_typing(data):
@@ -93,18 +90,6 @@ def crear_partida():
             'letra': None,
             'activa': False,
             'categorias': { cat: "" for cat in CATEGORIAS_BASE}
-            'jugadores': set()
-            }
-
-@socketio.on('palabra_lista')
-def handle_word(data):
-    room = str(data['room'])
-    cat = data ['categoria']
-    val = data['valor']
-
-    partidas[room]['categorias'][cat]=val
-
-    emit('actualizar_tablero', {'cat': cat, 'val':val}, room = room)
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port =5000)
