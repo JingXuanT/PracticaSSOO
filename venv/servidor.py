@@ -11,7 +11,6 @@ CATEGORIAS_BASE =['nombre', 'apellido', 'animal', 'comida', 'fruta', 'color', 'p
 
 def temporizador_partida(room):
     socketio.sleep(60) 
-
     if room in partidas and partidas[room]['activa']:
         partidas[room]['activa'] = False
         socketio.emit('fin_juego', {
@@ -61,7 +60,6 @@ def recibir_palabra(data):
     else:
         emit('error', {
             'msg': f'La palabra debe empezar por la letra {letra_juego}'
-        }, to=request.sid)
 
 @app.route('/stop/<int:game_id>')
 def index(game_id):
@@ -72,9 +70,13 @@ def handle_join(data):
     room = str(data['room'])
     join_room(room)
 
-    if room notas: in partidas:
-        partidas[room] = {'categorias': {}}
-    print(f"Jugador unido a la partida: {room}")
+    if room not in partidas:
+        partidas[room] = {'categorias': {cat "" for cat in CATEGORIAS_BASE}}
+    partidas[room]['jugadores'].add(request.sid)
+
+    cantidad_actual = len(partidas[room]['jugadores'])
+    emit('actualizar_jugadores', {'cantidad': cantidad_actual}, room= room)
+    print(f"Jugador unido a la partida: {room}. Total: {cantidad_actual}")
 
 @socketio.on('escribiendo')
 def handle_typing(data):
@@ -90,6 +92,8 @@ def crear_partida():
             'letra': None,
             'activa': False,
             'categorias': { cat: "" for cat in CATEGORIAS_BASE}
+            'jugadores': set()
+            }
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port =5000)
