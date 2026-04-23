@@ -30,9 +30,13 @@ def status():
     response.content_type = 'application/json'
     return json.dumps({'servicios': servicios})
 
+@route('/playstop')
+def playstop():
+    return static_file('playstop.html', root='/var/www/html')
 
 @route('/prueba')
 def prueba():
-    return 'Esto es una prueba de ruta'
+    return ''
+
 
 run (host ='0.0.0.0', port=8080)

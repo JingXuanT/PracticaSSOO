@@ -17,7 +17,7 @@
 		    ¡EMPEZAR JUEGO!
 	    </button>
 	    <h2 id="letra-elegida" style="color: #333;" > Esperando a que empiece la partida... </h2>
-            <h3>👥 Jugadores conectados: <span id="contador-juegadores">0</span></h3>  
+            <h3>👥 Jugadores conectados: <span id="contador-jugadores">0</span></h3>
     </div>
     <hr>
     <p>Nombre: <input type="text" id="nombre" onfocus="bloquear('nombre')" onblur="enviar('nombre')"></p>
@@ -29,7 +29,13 @@
     <p>Fruta: <input type="text" id="fruta" onfocus="bloquear('fruta')" onblur="enviar('fruta')"></p>
     <script>
         const socket = io('http://158.158.122.32:5000');
-        const room = "{{ game_id }}";
+        const room = "{{ game_id }}"
+	socket.on('desbloquear_categoria', function(data) {
+		const inputCategoria = document.getElementById(data.cat);
+		if (inputCategorai) {
+			inputCategoria.disabled = false;
+			inputCategoria.placeholder = ""}
+	});
 
 	function empezarJuego() {
 		socket.emit('iniciar_juego', {room: room});
@@ -73,7 +79,7 @@
                 el.disabled = false;
                 el.classList.remove('bloqueado');
                 el.classList.add('actualizado');
-            }
+	    }});
 
 	socket.on('fin_juego', (data) => {
     		alert("FIN DE LA PARTIDA: " + data.razon);
