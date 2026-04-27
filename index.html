@@ -2,16 +2,118 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+<style>
+        /* El fondo oscuro que cubre toda la pantalla */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* El cuadro blanco (el menú) */
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            width: 320px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        /* Botones del menú */
+        .btn-modal {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+        }
+
+        .btn-crear { background-color: black; }
+        .btn-unirse { background-color: blue; }
+
+        /* Input del código */
+        .input-join {
+            width: 90%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        /* Botón cerrar (la 'X') */
+        .close-modal {
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #aaa;
+            text-decoration: none;
+        }
+    </style>
+
 </head>
-<body style="background-color: #e0f7e8;">
-    <h1 style="font-size: 60px; text-align: center; margin-left: 80px; margin-right: 80px"> Bienvenido a la página web de SSOO de Darío y JingXuan </h1>
-    <p1 style="text-align: left; margin-left: 80px; font-size: 20px; color: black; margin-bottom: 60px;"> SI QUIERES SABER LA FECHA Y LA HORA PUEDES ENTRAR AQUÍ: </p1>
-    <a href="/hi" style="color: blue; font-size: 20px; margin-bottom: 200px;"> HOLA <br></a>
-    <p2 style="text-align: left; margin-left: 80px; font-size: 20px; color_ black; margin-bottom: 60px"> SI QUIERES VER LOS PROCESOS EN EJECUCIÓN PUEDES ENTRAR AQUÍ: </p2>
-    <a href="/status" style="color: blue; font-size: 20px"> STATUS <br></a>
-    <p3 style="text-align: left; margin-left: 80px; font-size: 20px; color: black; margin-top: 60px;"> SI QUIERES JUGAR AL STOP PUEDES ENTRAR AQUI: </p3>
-    <a href="/playstop" style="color: blue; font-size: 20px"> STOP <br></a>
-    <p4> ENLACE FUNCIONAL STOP </p4>
-    <a href="http://158.158.122.32:5000/stop/8000"> STOP CORRECTO</a>
+<body style="background-color: #e0f7e8; font-family: 'Verdana'; text-align: center;">
+<div id="modal-juego" class="modal-overlay">
+        <div class="modal-content">
+            <a href="#" onclick="cerrarMenu()" class="close-modal">&times;</a>
+            
+            <h2 style="margin-top:0; color: red;">STOP</h2>
+            
+            <button onclick="crearPartida()" class="btn-modal btn-crear">
+                🆕 CREAR PARTIDA
+            </button>
+
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+            <input type="text" id="join-code" placeholder="Código (ej: 1234)" class="input-join">
+            <button onclick="unirsePartida()" class="btn-modal btn-unirse">
+                🔗 UNIRSE
+            </button>
+        </div>
+    </div>
+    <br><img align ="right" style="border-radius: 10px; margin-right: 20px; margin-top: 10px" src="data:image/png; base64, UklGRlYcAABXRUJQVlA4WAoAAAAIAAAA8wEAGQEAVlA4IHYbAAAwfQCdASr0ARoBPnU6mUkkoyKhJJRZOJAOiU3fCBusO/l8xCBp/438sfCu3x4P+u/tf+YHy78h9gvojw/xRFa+W3y3/qv8X+TXzK/yn/K9j36R/5PuF/qJ/qP7v/b/2f+Kf1dfuv6iP6R/h/+1/j/dM/6f7ke9D+rf6f9hP9J8gX8//tv/l7HX0DP3c9XP/oftn8L/7eftt8CX7Ef+rs7elX6l/yv8jfB3/P+H/kF9oe5HK3608zf5d9tv4Pro/dv+P4b/H/UC/J/5n/j975AD+Y/1T/reJtqR+GPYB4NigL4sGhX6/9hf9heueNixonl2yzRPLtlmieXbLNE8u2WaJ5dss0Ty7ZZonl2yzRPLtlmieXbLNE8u2WaJ5ckA5l8d78YwvcEW5gHgItzAPARbkzDzNj5gPob7HocCsa2QQB249EF9wOsSISPu4ItzAPARbmAeAivtpT8Ph05Eq2FyZeL9U/pbqGl0vRD6eEHpnO4vDPrfAI7ZZonl2yzRPLtlmmMJ7GLZUdCRH/W3jcFUUkWMjRPLtlmieXbLNE6vcghc5wTNoJJ72RbCnKXrHjReSRFajM+I5DkYxaa1NlmiQyKswkhdQXcesBE86mTrJRI3jzMtw3B1dgNYgtnfFvQyydzyrsRB8INxzUID1/Txgaq/n7JMFT0xJibEpNXZP/v0GrJw9hd0KeysvgFTdZ/ngAZxfpdVbwEW13RNbJVVQtgH24UO6y9t/KL3c/ryUDRazYEnK+uokq3I8TZNEy0WBnqVwga0NZXVwt/fezq6sS65godJHNFysCq89y1njDMeHbO+vf1NXafG5nu9f014V6Alj7fSevsjRPLl6NbIISj9d5yhtvPrk86xjZmRMJTBc3L1FbHZ93x93tss0R8ScFraaG0vJO4TFsWV1nbGN2UOUIlGUM0d+cE4oKDnNx6/MSZaSQ0TMFsmoelS3JuMQ76QWw8F8c0t1BSF2HtQB44LExkcwN+ObHkYvtNsqrbxCO0soPngdr0ezL+r67E2xk+zi0PCwETwf3bRIAsQTCWHSPoNDig3xq5+GLX66IUIZfdRfa6joNPpLJjKsWMGtWA/j9HMP1rXHBRGTllaA/P4f0Bkk0ADoVW4cDa739PDyahyFXFmMVBTGY3r8Eb2/xa4lufpqupI8/bzNhIr8uUTdyQqEj6NU0j7T/mNzgsz94b2eJEqAGa5OTT7rPZ5lapfnAAuNrfi6dpI37h4rbq7INDUajUajUajyWaJ5dss0Ty7n7PNzWku2WaJ5dss0Ty7ZZonl2yzRPLtlmieXbLNE8u2WaJ5dss0Ty7ZZz9ZsgiVeF7NswvM+PB4/27gAAD+/eUfaLUrUqJ19ge/i+P8Xx+IGTFRAAT6GiAAAAAOB0c5flR9H/l9K6XDOd1ZyD/WUquPcB39oYsuNz74sRGFJche5bZoeo2K455kkaKbr2gcsQfIHpLaFTdOjBBrPenkBeru2+MGflyoM7WYfoguAABneqDN+/CPyBXMX9ogHMhVR3uWY4WrxjNroMeCbn63YEsRllil7xMC52rOdJRNUx7iqC6FYsjUNvk7F5/f8O/ibveS+3MrosdRLCSN9dwe1+kNsRMvpdmb29gj2nOMVcq5fhd8XvrV4u4bGQNIZXSjeDGWQbrz/0HSrauIox+oT7HWyVFA8VOrl6Rr5VOfOPITMUvezfmK0coe1wb8p3bbYgWU0Jluj55wz8v0zv2OGWRODAouz71c8JOl+pL+hhR2NZzFBXtHosKJd8WAjzZWUaSklAxJGyon3++waguvyYZMJXdml4It2kVh/z1H0vWW/N2i6oTEFtVWrP5dxftExDncqNtkl/JVgXbD+2N8NJh4y8L1UAG7gG8rmdggRsgA4SG/zy4VGkjYqgQUsrCxAtsUSnpn0r1sOp2ChSlNsn6uuFIRRnJIOosyhI2s7TxN/rCxsnZNWCL7RfkOsv6cd9EUXHbGbiqUca1typCkVN2scAvesVsmgPlTDqzxsp3m34OUQwSYUHNYAj3juP37qE3AaHSlPnkQv6o7dtGAI1Bza8lChU1XzyeDt2Eoig13iKBsdxiFDh1dirbK6zoDK7nOUCWRSrDRZ4tDYDsihiFTDHdi1Z/C33FKun/n3NJPZ1hAfYyAgsUeUcTgjW/mTV/eM2mx8wdcxCJMlatKw7R68SyuLk2/BlwW/0R0gqXNx0e9n+BHL0pTjk80un2fl86ImQUBoBG9ShwBCvDj/7xN1g3y77zYoY4+NkEh6Vv9/yAuPhq0qqW7pDHlKPf9hMxH5ego38+p8mxr+X4yfECv71OuPeP2rHpfbD4YUVzB24k1m+FjM/aSTkWnx9N3Yd2EAA9qPFdqwNHIVXqn1cfDJTp2PGQpKSWz1wAXYg1DnsVBolKCpaKcnggt1BzRvpBwHjQNMWyNeCvp9kMYXxQ/ZymlNrsmxvgQAWndAtLtZ2UEolK06Hl3RVOFc87xIJZeieOQvN17nDo5WoVUTReebWYtsGnkrKI/9QZ0eQANt/+s1A+tybf6i13EhYAASVUPBCzsJpHvtCcnDRBgWnmbzUwkEJzp6YOG3+VimeVF3oH0LCWrM+acjVWge+k5d+2UQ2FFLV2J7VcvU1/luJ/vUZeNFBs4u3NS9FfvPsB+rs/GLQyeKX4HiLeOb+Y2LUGrkqCb7+A9MgTC010tXGyT/UDlhtkLNy9OoRKHEKiPPvc3Xwkn7ecn4JXMZZIzeVPxzJ87eIvB9OGfHQSlE/olSjjM65gLacWcghN2CHmHO6gNPItAnNnz1VEZULEAWBfJxCG2SdNDNufk3iBdbg1TI2QVv9FggJVn83qHg0O4SAErA7SOeSigYTt5J+u+QB8P0ha9vylwvRLfop27P/UBqZOt/8zZJWulQ+hlVHFl696Y2Y25j5EhNTIth9BAf0A7DjhezODt70rwKpsFlkdqScqwZP5a4GBxzvL2ar4iA0741Pez46EZYy/phjb0Qdu8M5iDSfNhMl3tcyh54PJ1K3CB/wIR9bxjm/3Ip49P4NMImIM/hrNj7K25sez8b1V8YcMLuiPVMwbQS34QYVqzIpM6bdFGix9Za9wDRIpgbPTyU0p0opjjfYlXw17IR9hdD0S05VM4K1VIjAIY6PgC2eXk+wPUuEO7pWNMf+IyKiGWe8OlzmYEwmi0s1mTqrza1Zm5Kc31q88Rqu9BgcgHUkq9QwWRJrWu6qhWqreYxz8QtwC+3dUU++jAav2zYe15CQkAKowPcPpfoRidKQwWHB4Vs1G4f065zT8TDXPw00wSrSVxw3U4qqt+NMYRcknpfw1SC2TDH06XPUq58HKthljXY5T4RTTjFJkMFbofm8gkirLct25D3eT1wdhUpj9DWAPP8ZbCKmKiDIeCad4Dt7sEFFEAjexmxO4/T5SQWhYrBJaO14i0c0u37IOmWWtxaUHVnIeQ/8TA5P8xNSiyoVRKyGqPUlPTuAFRL9ep0dbo4jwr/9B/tVzMoYxmtiTafG0wtQbrsSAujjXbS0yMebSxQrj1V43F5A+BycZxFiFRh5K4vGoVMSCt/LiWe6LcsAlPfculMV1A/a/h67PnHjIvaJzsXf5gA8p9Z3pb7hK3oVboaRl9JVlXKxWwhvySLcTLE4Padb6Lo6VvNO1et3FjWreBPcJN3sWA8JczoDQwKHAoSDOVApJjUX27QbnJGbWw1RFRRclvc04vGTBuhmMW1+Avod6nz8JSLTolA4jrE9LnO3gmEHOuN6bte/sOV4xLLky4GoQYTHXdelXnqskfan1FqYs0uE4WvotuluweZHJSqrlogonRTWgDkSm4xRyJjQii6Q1tHEQULewN35oXQj6odPKTOcVyb4zo+kbgNGpA0ZE4eGBHx6VYisYiwpodC7Or9PIOgdYaJGoemV5FX0A/yKYck1Cw5k625jfjAn/svNJTyl4o4l46MoIF57YfMeXOSH5Mp82KFgOqURYOydWWl+ZM12kVCr5dmN37OIvys6cUNFYiO0H4Rax+Yg2AIABLpYwm8yiF2UYM2hNs1gImqaG9R302qrTKTPsws0lYxWI5FxEsBlGVKfIFTQWK+sykXni/V9ZRTShk2t0aCbSai6nHEZHAaFEb8sy6y5DFoiNE4vMIOp6U5Y1WruUtbggjAwgxKokbRrPZSieIC29UK3KchLwPRal3J1uurHVKP8gIIaadTzCbpov9cbL3j09PDvw6jtnZASdO3DVjeciea2AuCkghchlNfOIUCl1u/oGKgkdKphykjG7CDqDz5jx7L7qtFlKvrptHFe5p/8Rwg9RtsALYM1nIiFjKR6RXov14UY4znymOSvBdx+H6sb2lC5PN+nLQzTkrCkM94QLPT7k7lXW1ZXeDUnedGvLc458vRHKnfveleM/Pd3ja2DK8LPl1KZ62uod6myo3vZk73GYBKK2l9FfKCUU/MKSK2nLvrvGnX7or3zGX6cYcJvRJrq830MGyWJ2UwosVOJk/krwIDC9v/XChZQEDnIUJFkeXxcSnr9K6Xe/tR7Pt4ZNym20MTsIOlH/H9uO/yRv+Rou1TbL8RrLSJM7CVs9oJ7NrVrHjkmqRfiAhBtHokkBw4vz9I3KhEz6/b7K0II2oDu4Sg+RLCk+FOTnPsswXGwleMtJtvud0dX5/jC2TzAhkn6QYLCRkjj8IpAZ+kApd9+1V4lZJwguiz+hMVCD83YSeua4qiMM8wzZgxfRyDyEx/PSA9LCmcpZoKKUO8mQnhKSmDYOjv3AR2PH68PN2ywOCpdkw36KckJW/IPQnm+TNtB0QB74pUj6zZkZUklaR/M/05ZhWMCdka68+4JXQl905/FyoBRaJkkrVLjW2WX5qLPBA5wdgbL18aI6y88qXi4XB/m9v+w8aqOByiCMdc2Tk87L/EB/kIs35xGsvra0OlX7rWyWCUKYUtp6eQeoff7o32ltUY56GoetQSHMj2gXmYbN47DqmNdRvFAuGpbJ1e6KZM+kTgAW8Wp/2908sskihrIeUzKdqwh+bTlcn671cxDhOIws7EqfjVoYfTynpJKS3sH/cMlLp+vIDhuPi7jJ6LXLyEnROLn219LM5eyQwpRrCkdcNqoWmzfNv66qvnJb7GCD9gyMCIW7Eq/5qBX86Jfgu2nxM9jD6Vd7PN3PG6Wa8FYqpkYLSvB/9NY7IHjR0H9QFtXZIut/b87WWdHx9oCVoidb7wzpkSK0dQ6lSiZvOsVB26T9yOGOepZRsaQkZ1zdEiEvzIjo5PtDHa9y2ur8pNgoOOnxepUkBXEt+dhIX1pwkZ6mVnir8Nc4FN6YgK1hQJiuglhFEX70Y6QfxlSoIYLkgsu4OmEIJav4y7MTMVCs/A8gSnc7ur6tR74wo/KVPkDiQSDI85MQ7b/ccaF9k0UHXv38A0KIF0z47SOAf5s0hp2bVGhw4Smkqsbdd5+7F7T+sdVQxVVKQuo+gNG1P7YTLDDFx2mrxVTmir1iwPW0mdt690OBURdQ3iYm8SgAACFVUSCCFwWJWUxzXUgltBA6KJ4heynCnH6m83iEFnhkGaBDReuNR4ab/7+LYA2xaAYVW/1cNQwXJRx5/ShLgZ9UqqQIEw9tRE25HDuYv9MovAwgmsDhxO1sYCchq+fvRazC/LDlYwqXQaUB71PPPoI3bV+z6s1IO5N36I8eSUxL5bGuM5C/CpWc8aQ6z2/2CGt6XlcYmSOEzoGFwDqCayZ7zGkucGXYOzhHSdiqns+nxyp3M4b+kB+29HhQtrmcXvIq3JijOjHHaP6/LPxbfS5PEfJiIUJVobjOfw9KlpYEBluQo8IutNN6GBmWke0ElWkZhEa5irOX6VfaI2Fa5IaQPu3ytFEmkXc23jKB+CCkqDj+4WRTl7HKpZC4+vEKT8HOEKKpa1wfefIw0jPzbQOWJ4eg7tfOuMLwg9DQVcWmUaBYs8hpXeM2BE8XiuvKOnPnObJycAhWfAKv7SwpKC8yWwanoK6Zjs7h/qA5QMjIHpQ7NXlwrr6QIoZjsgZLK308JlVKqsozasMTNtcxiLfNUVPb6niMW1w8B8W10/+gAA1Haw88XJO/Q3IxW3xBBB6U6FskMUjZ7FEcBg8EVByABGF/hmcAphFvQFtETLA4kl8eyTN94qa0dcVEcK2MtS8KnWxcpHpUEheUiFrMtuqvzxU39/rqL/S2V9JPQ9e7gdrDjrKebmg7xPIfdu6C3Iz6NqhXHWYwgvpOlav+EfpkkUl8C/V0oKcQimHNiXsFbsXNbQU0eFy/FetJwkgJ1wpAf0M0SS2MYcQZdhDeBEC4Yw3NzlOtAZu/o4g/HtKDVgQ6VT5rR/xbC0+b+7CHu3rfRgRG7E/mPsW9bMcErii37vcxX15Bzx9LxAqSkKlUWJFQzGQmH8Q3BNNDNFN5gKh0ryBDkGsCJuSgqLJ02109OdFrWmlCv0WKvkAIGq8x8k+lGuAaGxCNNjGSIueLz3Zybpjnnd7OeozzrOkSsrpy+9GQtKQUAyrrtuDCC+a0XBqJ73Jt3XgWN0oa78oryoJdrX/dag+CNdfi0edknr5kZomx3nLxHFsHDGf85Ax57dlbDnyS3boQhtUhVO0pAUHwN8tDK+gmojf3p2YJL7xa9HHiQGQkSMVFvR0BGw2tXhxNxEXYxlk3hAuQ1dT+f/V3oEZlzwgphIMD56K8fgV0hPte7nJmZws1t2Sd7/e6zMLjioxseoYtfjodiSJnJF1/9NaPjH9WupJBtBzUyfn6PuhljWbQq+K2CEedv6SbRbLp278OzSb76dOMAJct0+YFHrUTVPlwg/oqnY3KqTDwFEoq0Wa9FTzEwsPm2Nwb8yt2jMUiRDFjBRREIxvdAi5M5S4zUJ+xgHZnW0d1Pv64ZnCGXrGUAqX2UjKgzEwvU1XFh4rWAK71LCGdt1JCwdbv740xuomInIHCj/f4cqJ4OG8QDBo/mBRaYea5FXrWU0jwN6DiWygsBIkEoQ/Sl1+yyVDpIU3Cfif/vMBJ/yzgLbN81sPgF9rVczHqLUIJ2AbzngeCH8wPNSg7LgayDNNo04zF8xCrcrN1hgx2MAEFRM2rSkahhHbXY9mcDIdKO+HKMZCOafeYZbS7rOcoGlbhDM73l7A+t8egdHj2/irixC1W8b11sl11bE5Opp3Ki8UzMkiyemls/EtAkjjmtuWwrEhFCyr6JWGk6TTu94UQmfQ9zByDHfTb2sXgQqFDnKorrcuXeZ/29kuUnc3adTZnof0GNY/skTgxgttgd3pL2VPFnkXk9asPP5/l/Z5MQj/W/G7EjTKYiypMsHqXWZcmXJ3hFJW47aLwmhdsyAW2bPEhdYt0dBsl7gZ1900KqRtL3I3NsqJyV43hIgh1666iRUH8JJXTutp78nlE6DCEp0eXKpsa6AdmC15XZpBDZD8rtjDJLuErk0r3kL59Va6n4P95yEBtkKQGQ9AbvKaMAF4WVIfG3lM1qyPd9hIqqBC8lp69cxRrXD6H04obKUNx48iyIRSkW0DfS7tUTVNiZeCtOX0Un99YByrNPl21aFBRBvqChcjd+AxVQixU5rTxJIthV14inxXe1Tvl34klDGuMcc4Xs7PiHEZer23y292yyU2M03eMcpGAPaKMbf3/qEASs3FoGxFqbH7TnZxEwaCmtd0i7RoV85Mz3hQAISgSqyhFGsVUd8xH9+2Pz8fuGOhZ6kYSmqnM/zaPJj/5RTPBuNwKI/qErxHyEtZY6eqPHNaVGG5hVrZCL60Tj4/s8zIaplrk09VGmD6FYXE+Sge+IoRRypEo6jYf0sQ0vJ6zcllx4Z9JfG26lVQrXgLX/YNUBJG5AvM26pNwEvPCEb4hO9v0LhdsCgZ1fXUbjfWMy1DdG7leF5YuUd/icv1nXSy6f9WsU6d8Shxxx2HsMaBX+zWIQW7NnETG2thxfd3FhVqiOtyIOUqB/dqsVbmAUcvOeM7Poz1HOPYix2F8uaIKHxYscXVXOmduzZpp+NGTXnoRFbVVDzvNdgg7lUHz5bRp/ACvZbX9/h6PzMnrxlUpOP5koGc9F5tklbuVuDN6YSmMSmCzwoXs/bac/VTeWnfi1Gn2t5G0Szq8WCdvScWucspi89hU4LAwuDip2SUC308s+ekfSSgPJ2lr5IlzruJaU9n++zRoRrMZO3VeG42aIcrxiDlfZy0sMRv5KtxD5mjBGO03vJO9GA3Z0Rur6WFTOTb0E+yevIykmFxixIpMy/691AL7YOW429j3SLt+SJrL3u+WXXwX/xETyaYH6V/uEQ+gCoT82yw5YWyKjJ9kzvQPthFuCLmLKqrXJn0c1brhKcIKuLF2VhA9wzaSPD7lfmYlTDU47FqoYb2XU3ntR6W67uwfbIEIYRssdEwstQmgcqjbahioFp9SuLXpSyGfB1OwLuUnQcF8bpbWh28lPm9mad9Giug1eGHcIpdj4FAkKnwY0nKQi46p3rMzwKmu5hmPkNDN/+wXpLuRTvqkw8esBw8RZ30rlaqf8QZz6TdDmIleQyeSRbYhhWpa1KhKY+G/1+ENVsxOOgJzSUfa/dgqGKsTr/LZKxcRpR+vxjcz2JFcnzrfONVHXKPYEwiiueYcyX2JU6bEynt5m4iGWL2XMbfU1AK0oioQiyd1UC5jzZvYYF2zUJ/OqizBJFEsU+5C3OosebdnAlNlfkc1cHG1to8OOlSoFzp2IeClThJLMhtKQ7YfdZ39sdMI2ljWwq9v+6+KXnDtqn/Pui7RLXNDjSeTByEH2UsHNrLhILsfzHUA+Nb1sKJThR90vmvf+2lbKh1/Ry/W6Q1KKlVLVyNV4F51YkggHnnwLtPQmjbPAjKSj2bP5CJbtguFgaBjZ4S7MGsbBF8FB6c3da+9KizFtT1YaEB2HFPxuZO7LjAnOqemeeW9JPkHJ9wLytxSNkcISK+8KLPAs1/Q2BlZZ7b37k608W5BOwo8TpPDpZix3BYh3fv/QyxbLhjP26FQRx+FWjDnklY/cnTQgYswdFzAjmLjJMU5Z/PNhkGdTwJ1fSFliC7aEdhOqJnDmWKjypMpUgKUA3Egvhv8AEqoW4GLBmsIraHygNLa4ZGhQfao224ysui0RF/FLk+rIVfqqwToUfY52UKW6C7vjS4vuZmFyFp+83Oq4wfFg1YeNWGyj/G9dIsOCNplWso0jWr7p0ijpHPqvZKiPPRJVylElzcYKimfw0lzP75X7rTCcTL8NhwqgRY4IB/DOmCkXd8ZcSeGwJ6lvInsqPu7Jo2YA0RsA7SCdVFpo/nXs3q14hs8xFmB/z9P8PLtBI0ncjTpkALQaHXiDHpQ/xV0oR/mdFk3gibC/OXCxAbdj6OYAAAAAAAAAAAp1tOwW27QkDNiDCWzLW/a1D9VpwAAARVhJRroAAABFeGlmAABJSSoACAAAAAYAEgEDAAEAAAABAAAAGgEFAAEAAABWAAAAGwEFAAEAAABeAAAAKAEDAAEAAAACAAAAEwIDAAEAAAABAAAAaYcEAAEAAABmAAAAAAAAAEgAAAABAAAASAAAAAEAAAAGAACQBwAEAAAAMDIxMAGRBwAEAAAAAQIDAACgBwAEAAAAMDEwMAGgAwABAAAA//8AAAKgBAABAAAA9AEAAAOgBAABAAAAGgEAAAAAAAA=" width="150" height="85">
+    <h1 style="font-size: 40px; margin-left: 80px; margin-right: 80px; margin-top: 200px; margin-bottom: 60px"> Bienvenido a la página web de SSOO de Darío y JingXuan </h1>
+    <div style="background: linear-gradient(white, #e6e6fa); padding: 20px; border-radius: 50px; border: 1px solid green; width: 80%; margin: 0 auto">
+    	<p1 style="font-size: 20px; text-align: center; display: inline-block; margin-top: 20px"> 📅 </p1> <a href="/hi" style="color: blue; font-size: 20px; text-align: center; display: inline-block; margin-top: 20px"> FECHA Y HORA </a><br>
+    	<p2 style="font-size: 20px; text-align: center; display: inline-block; margin-top: 20px"> 📓 </p2> <a href="/status" style="color: blue; font-size: 20px; display: inline-block; margin-top: 20px"> STATUS </a><br>
+    	<p3 style="font-size: 20px; text-align: center; display: inline-block; margin-top: 20px"> 🎮 </p3> <a href="#" onclick="abrirMenu()" style="font-size: 18px; font-weight: bold; color: red; display: inline-block; margin-top: 20px;  margin-bottom: 20px"> PLAYSTOP </a>
+    </div>
+<script>
+        function abrirMenu() {
+            document.getElementById('modal-juego').style.display = 'flex';
+        }
+
+        function cerrarMenu() {
+            document.getElementById('modal-juego').style.display = 'none';
+        }
+
+        const ipServidor = "http://158.158.122.32:5000";
+
+        function crearPartida() {
+            window.location.href = ipServidor + "/stop/new";
+        }
+
+        function unirsePartida() {
+            const code = document.getElementById('join-code').value;
+            if(code.trim() !== "") {
+                window.location.href = ipServidor + "/stop/" + code;
+            } else {
+                alert("Por favor, introduce un código.");
+            }
+        }
+    </script>
 </body>
 </html>

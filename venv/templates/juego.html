@@ -6,54 +6,43 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         .bloqueado { background-color: #ffcccc; cursor: not-allowed; }
-        .actualizado { background-color: #ccffcc; }
+        .actualizado { background-color: #ccffcc; border: 2px solid #4CAF50; }
+        input { padding: 8px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
     </style>
 </head>
 <body>
     <h1>Partida: {{ game_id }}</h1>
     <div id="status">Conectando...</div>
-    <div style= "backgroud-color: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-	    <button id="btn-empezar" onclick="empezarJuego()" style="padding: 10px 20px; font-size: 18px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px;">
-		    ¡EMPEZAR JUEGO!
-	    </button>
-	    <h2 id="letra-elegida" style="color: #333;" > Esperando a que empiece la partida... </h2>
-            <h3>👥 Jugadores conectados: <span id="contador-jugadores">0</span></h3>
+   
+    <div style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <button id="btn-empezar" onclick="empezarJuego()" style="padding: 10px 20px; font-size: 18px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px;">
+            ¡GO!
+        </button>
+        <h2 id="letra-elegida" style="color: #333;">Esperando a que empiece la partida...</h2>
+        <h3>👥 Jugadores conectados: <span id="contador-jugadores">0</span></h3>
     </div>
+
     <hr>
-    <p>Nombre: <input type="text" id="nombre" onfocus="bloquear('nombre')" onblur="enviar('nombre')"></p>
-    <p>Animal: <input type="text" id="animal" onfocus="bloquear('animal')" onblur="enviar('animal')"></p>
-    <p>Comida: <input type="text" id="comida" onfocus="bloquear('comida')" onblur="enviar('comida')"></p>
-    <p>Apellido: <input type="text" id="apellido" onfocus="bloquear('apellido')" onblur="enviar('apellido')"></p>
-    <p>Pais: <input type="text" id="pais" onfocus="bloquear('pais')" onblur="enviar('pais')"></p>
-    <p>Color: <input type="text" id="color" onfocus="bloquear('color')" onblur="enviar('color')"></p>
-    <p>Fruta: <input type="text" id="fruta" onfocus="bloquear('fruta')" onblur="enviar('fruta')"></p>
+    
+    <div id="formulario">
+        <p>Nombre: <input type="text" id="nombre" onfocus="bloquear('nombre')" onblur="enviar('nombre')"></p>
+        <p>Apellido: <input type="text" id="apellido" onfocus="bloquear('apellido')" onblur="enviar('apellido')"></p>
+        <p>Animal: <input type="text" id="animal" onfocus="bloquear('animal')" onblur="enviar('animal')"></p>
+        <p>Comida: <input type="text" id="comida" onfocus="bloquear('comida')" onblur="enviar('comida')"></p>
+        <p>Fruta: <input type="text" id="fruta" onfocus="bloquear('fruta')" onblur="enviar('fruta')"></p>
+        <p>Color: <input type="text" id="color" onfocus="bloquear('color')" onblur="enviar('color')"></p>
+        <p>País: <input type="text" id="pais" onfocus="bloquear('pais')" onblur="enviar('pais')"></p>
+        <p>Objeto: <input type="text" id="objeto" onfocus="bloquear('objeto')" onblur="enviar('objeto')"></p>
+    </div>
+
     <script>
-        const socket = io('http://158.158.122.32:5000');
-        const room = "{{ game_id }}"
-	socket.on('desbloquear_categoria', function(data) {
-		const inputCategoria = document.getElementById(data.cat);
-		if (inputCategorai) {
-			inputCategoria.disabled = false;
-			inputCategoria.placeholder = ""}
-	});
+        const socket = io(); 
+        const room = "{{ game_id }}";
 
-	function empezarJuego() {
-		socket.emit('iniciar_juego', {room: room});
-	}
-
-	socket.on('actualizar_jugadores', (data) => {
-		document.getElementById('contador-jugadores').innerText = data.cantidad;
-	});
-	
-	socket.on('juego_iniciado', (data) => {
-		document.getElementById('btn-empezar').style.display = 'none';
-		document.getElementById('letra-elegida').innerText = "¡LA LETRA ES LA: " +data.letra + "!";
-	});
-
-        socket.on('connect', () => {
-            socket.emit('join', { room: room });
-            document.getElementById('status').innerText = "Conectado a la partida " + room;
-        });
+        function empezarJuego() {
+            socket.emit('iniciar_juego', { room: room });
+        }
 
         function bloquear(cat) {
             socket.emit('escribiendo', { room: room, categoria: cat });
@@ -61,14 +50,45 @@
 
         function enviar(cat) {
             const val = document.getElementById(cat).value;
-            socket.emit('palabra_lista', { room: room, categoria: cat, valor: val });
+            if (val.trim() !== "") {
+                socket.emit('palabra_lista', { room: room, categoria: cat, valor: val });
+            }
         }
+
+        socket.on('connect', () => {
+            socket.emit('join', { room: room });
+            document.getElementById('status').innerText = "Conectado a la partida " + room;
+        });
+
+        socket.on('actualizar_jugadores', (data) => {
+            document.getElementById('contador-jugadores').innerText = data.cantidad;
+        });
+
+        socket.on('juego_iniciado', (data) => {
+            document.getElementById('btn-empezar').style.display = 'none';
+            document.getElementById('letra-elegida').innerText = "¡LA LETRA ES LA: " + data.letra + "!";
+            document.querySelectorAll('input').forEach(i => {
+                i.value = "";
+                i.disabled = false;
+                i.classList.remove('bloqueado', 'actualizado');
+            });
+        });
 
         socket.on('bloquear_categoria', (data) => {
             const el = document.getElementById(data.cat);
-            if (el) {
+            if (el && el.value === "") {
                 el.disabled = true;
                 el.classList.add('bloqueado');
+                el.placeholder = "Alguien escribe...";
+            }
+        });
+
+        socket.on('desbloquear_categoria', (data) => {
+            const el = document.getElementById(data.cat);
+            if (el && !el.classList.contains('actualizado')) {
+                el.disabled = false;
+                el.classList.remove('bloqueado');
+                el.placeholder = "";
             }
         });
 
@@ -76,27 +96,20 @@
             const el = document.getElementById(data.cat);
             if (el) {
                 el.value = data.val;
-                el.disabled = false;
+                el.disabled = true;
                 el.classList.remove('bloqueado');
                 el.classList.add('actualizado');
-	    }});
-
-	socket.on('fin_juego', (data) => {
-    		alert("FIN DE LA PARTIDA: " + data.razon);
-    		document.getElementById('nombre').disabled = true;
-    		document.getElementById('animal').disabled = true;
-    		document.getElementById('comida').disabled = true;
-		document.getElementById('apellido').disabled = true;
-		document.getElementById('pais').disabled = true;
-		document.getElementById('color').disabled = true;
-		document.getElementById('fruta').disabled = true;
-});
-
-	socket.on('error', (data) => {
-    		alert("Error: " + data.msg);
-  
+            }
         });
 
+        socket.on('fin_juego', (data) => {
+            alert("FIN DE LA PARTIDA: " + data.razon);
+            document.querySelectorAll('input').forEach(i => i.disabled = true);
+        });
+
+        socket.on('error', (data) => {
+            alert("Error: " + data.msg);
+        });
     </script>
 </body>
 </html>
