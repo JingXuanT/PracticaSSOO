@@ -19,7 +19,8 @@
         <button id="btn-empezar" onclick="empezarJuego()" style="padding: 10px 20px; font-size: 18px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px;">
             ¡GO!
         </button>
-        <h2 id="letra-elegida" style="color: #333;">Esperando a que empiece la partida...</h2>
+        <h2 id="mi-identidad" style="color: #4CAF50;">Identificando jugador...</h2>
+	<h2 id="letra-elegida" style="color: #333;">Esperando a que empiece la partida...</h2>
         <h3>👥 Jugadores conectados: <span id="contador-jugadores">0</span></h3>
     </div>
 
@@ -30,7 +31,6 @@
         <p>Apellido: <input type="text" id="apellido" onfocus="bloquear('apellido')" onblur="enviar('apellido')"></p>
         <p>Animal: <input type="text" id="animal" onfocus="bloquear('animal')" onblur="enviar('animal')"></p>
         <p>Comida: <input type="text" id="comida" onfocus="bloquear('comida')" onblur="enviar('comida')"></p>
-        <p>Fruta: <input type="text" id="fruta" onfocus="bloquear('fruta')" onblur="enviar('fruta')"></p>
         <p>Color: <input type="text" id="color" onfocus="bloquear('color')" onblur="enviar('color')"></p>
         <p>País: <input type="text" id="pais" onfocus="bloquear('pais')" onblur="enviar('pais')"></p>
         <p>Objeto: <input type="text" id="objeto" onfocus="bloquear('objeto')" onblur="enviar('objeto')"></p>
@@ -39,6 +39,8 @@
     <script>
         const socket = io(); 
         const room = "{{ game_id }}";
+        socket.on('asignar_nombre', (data)=> {
+		document.getElementById('mi-identidad').innerText = "Eres el " + data.nombre; });
 
         function empezarJuego() {
             socket.emit('iniciar_juego', { room: room });
@@ -100,10 +102,18 @@
                 el.classList.remove('bloqueado');
                 el.classList.add('actualizado');
             }
+            console.log("Palabra aceptada, alguien sumó un punto.");
         });
 
         socket.on('fin_juego', (data) => {
-            alert("FIN DE LA PARTIDA: " + data.razon);
+            let mensaje = data.razon + "\n\nPuntuaciones finales:\n";
+
+            for (let sid in data.puntos) {
+		const nombreReal = data.nombres[sid] || "Jugador";  
+		mensaje += `${nombreReal}: ${data.puntos[sid]} puntos\n`;
+            }
+		
+            alert(mensaje);
             document.querySelectorAll('input').forEach(i => i.disabled = true);
         });
 
